@@ -1,0 +1,27 @@
+---
+- name: amit akarsz
+  host: localhost
+  connection: local
+  
+  tasks:
+  - name: Set facts fro URI
+    set_fact:
+      tower_host: '{{ lookup("env", "TOWER_HOST") }}'
+      tower_username: '{{ lookup("env", "TOWER_USERNAME") }}'
+      tower_password: '{{ lookup("env", "TOWER_PASSWORD") }}'
+
+
+  - name: First call to get template data
+    uri:
+      url: "{{ tower_host }}/api/v2/job_templates/"
+      return_content: true
+      user: "{{ tower_username }}"
+      password: "{{ tower_password }}"
+      force_basic_auth: true
+      validate_certs: false
+      method: GET
+    register: templates
+
+  - set_fact:
+      templates_pagesize: "{{ templates['json']['count'] }}"
+      
