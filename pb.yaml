@@ -1,8 +1,7 @@
 ---
 - name: amit akarsz
   host: localhost
-  connection: local
-  
+  connection: local  
   tasks:
   - name: Set facts fro URI
     set_fact:
