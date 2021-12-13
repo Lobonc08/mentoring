@@ -1,0 +1,42 @@
+---
+- name: Task 02
+  hosts: all
+  remote_user: root
+  gather_facts: no
+  vars:
+    ansible_password: password
+    ansiusrpwd: IamOnIt
+
+  tasks:
+    - name: mk grp
+      group:
+        name: ansible
+      when: "'test' in group_names"
+
+    - name: create ex294passed
+      user:
+        name: ex294passed
+        password: "{{ ansiusrpwd | password_hash('sha256') }}"
+        update_password: on_create
+    
+    - name: add ex294passed to ansible on test
+      user:
+        name: ex294passed
+        groups: ansible
+        append: yes
+      when: "'test' in group_names"
+    
+    - name: sudoers to ex294passed
+      lineinfile:
+        path: /etc/sudoers.d/ex294passed
+        state: present
+        create: yes
+        line: "%ex294passed ALL=(ALL) NOPASSWD: ALL"
+        validate: /usr/sbin/visudo -cf %s
+    
+    - name: sshcopy to ex294passed
+      authorized_key:
+        user: ex294passed
+        state: present
+        key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
+
