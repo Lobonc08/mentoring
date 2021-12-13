@@ -1,6 +1,6 @@
 ---
 - name: amit akarsz
-  host: localhost
+  hosts: localhost
   connection: local
 
   tasks:
