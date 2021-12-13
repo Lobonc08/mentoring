@@ -4,7 +4,7 @@
   connection: local
 
   tasks:
-    - name: Set facts fro URI
+    - name: Set facts for URI
       set_fact:
         tower_host: '{{ lookup("env", "TOWER_HOST") }}'
         tower_username: '{{ lookup("env", "TOWER_USERNAME") }}'
@@ -24,4 +24,4 @@
     - name: facts are setting 
       set_fact:
         templates_pagesize: "{{ templates['json']['count'] }}"
-...
+        
