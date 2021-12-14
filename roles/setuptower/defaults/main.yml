@@ -1,0 +1,16 @@
+---
+# defaults file for Setting up Tower
+#
+tower_host: ""
+tower_user: ""
+tower_user_pwd: ""
+verify_ssl: False
+scm_creds: ""
+#pdm_support_project: "support-lite"
+#survey_files_home: /tmp
+system_user: awx
+system_group: awx
+#ecm_custid: ""
+use_become_system: false
+
+blueid_shortcode: mentoring

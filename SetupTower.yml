@@ -1,0 +1,30 @@
+---
+- hosts: "{{ target_host | default('localhost') }}"
+  #strategy: free
+  gather_facts: false
+
+  #Set Up Global Playbook Variables
+  vars:
+    - supported_distro: "{{(('RedHat' in ansible_distribution) and (ansible_distribution_major_version | int >= 7)) or (('CentOS' in ansible_distribution) and (ansible_distribution_major_version | int >= 7))}}"
+    - python_path: "{{ python_packages_path | default('/opt/rh/rh-python36/root/lib/python3.6/site-packages/') }}"   
+
+  pre_tasks:
+    - setup:
+        gather_subset:
+         - '!all'
+    - name: 'Step 1: Verify OS Family, Distro and Version...'
+      fail:
+        msg: "The Tower Setup Playbook NOT be run as {{ ansible_distribution }} {{ ansible_distribution_major_version }} is not supported."
+      when: ((not supported_distro|bool) and not disable_os_detect|bool)
+      register: supported_os
+
+  tasks:
+    - debug:
+        msg:
+          - " Project revision: {{ tower_project_revision }}"      
+
+  roles:
+    - role: setuptower
+      when: not supported_os|bool
+  environment:
+    PYTHONPATH: "{{ python_path }}"

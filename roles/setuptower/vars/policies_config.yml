@@ -1,0 +1,4 @@
+---
+policies:
+- name: "AWX-Tower_Szia"
+  project: "awx-tower-szia"

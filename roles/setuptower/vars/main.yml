@@ -1,0 +1,6 @@
+---
+# vars file for Setting up Tower
+pdm_projects: [Hello_World]
+
+scm_base_url: "https://github.com/Lobonc08/mentoring.git"
+pdm_version: "main"
