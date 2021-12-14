@@ -65,14 +65,16 @@
     - config
 
 - name: "Create PbDevM Project"
-  shell: tower-cli project create --name project_{{item | lower}}_{{pdm_prj_version}} --organization {{blueid_shortcode}} --scm-type git --scm-branch {{pdm_branch}} --scm-credential {{scm_creds}} --scm-url {{scm_base_url}}
+  shell: "tower-cli project create --name project_{{item | lower}}_{{pdm_prj_version}} --organization {{blueid_shortcode}} --scm-type git --scm-branch {{pdm_branch}} --scm-credential {{scm_creds}} --scm-url {{scm_base_url}}"
+#  args:
+#    executable: /bin/bash
   loop: "{{ projects_to_create | unique }}"
   tags:
     - config
 
 
 - name: "Check project status"
-  shell: tower-cli project status -n "project_{{item | lower}}_{{pdm_prj_version}}"
+  shell: 'tower-cli project status -n "project_{{item | lower}}_{{pdm_prj_version}}"'
   register: result
   until: "result.stdout.find('status: successful') != -1"
   retries: 10
@@ -82,7 +84,7 @@
   - config
 
 - name: "Create PbDevM Scan Job Template"
-  shell: tower-cli job_template create --name template_{{item.name | replace('-','_') | lower}}_{{pdm_prj_version}} --job-type run --project project_{{item.project | lower}}_{{pdm_prj_version}} --playbook HelloWorld.yml --ask-inventory-on-launch true --ask-credential-on-launch true --ask-limit-on-launch true --ask-verbosity-on-launch true --ask-variables-on-launch true --allow-simultaneous true
+  shell: "tower-cli job_template create --name template_{{item.name | replace('-','_') | lower}}_{{pdm_prj_version}} --job-type run --project project_{{item.project | lower}}_{{pdm_prj_version}} --playbook HelloWorld.yml --ask-inventory-on-launch true --ask-credential-on-launch true --ask-limit-on-launch true --ask-verbosity-on-launch true --ask-variables-on-launch true --allow-simultaneous true"
   loop: "{{ policies_config.policies }}"
   when: item.name in pdm_projects and item.name != 'Windows-OS' and item.name != 'Linux-OS'
   tags:
