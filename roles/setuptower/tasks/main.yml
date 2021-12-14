@@ -66,8 +66,8 @@
 
 - name: "Create PbDevM Project"
   shell: "tower-cli project create --name project_{{item | lower}}_{{pdm_prj_version}} --organization {{blueid_shortcode}} --scm-type git --scm-branch {{pdm_branch}} --scm-credential {{scm_creds}} --scm-url {{scm_base_url}}"
-#  args:
-#    executable: /bin/bash
+  args:
+    executable: /bin/bash
   loop: "{{ projects_to_create | unique }}"
   tags:
     - config
