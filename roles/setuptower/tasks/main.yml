@@ -60,7 +60,7 @@
   set_fact:
     projects_to_create: "{{ projects_to_create|default([]) + [item.project]}}"
   loop: "{{ policies_config.policies }}"
-  when: item.name in pdm_projects
+#  when: item.name in pdm_projects
   tags:
     - config
 
