@@ -18,6 +18,13 @@
       when: ((not supported_distro|bool) and not disable_os_detect|bool)
       register: supported_os
 
+   - name: install tower-cli utils
+     shell: yum install -y yum-utils centos-release-ansible-29.noarch
+   - name: install tower-cli
+     shell: yum install ansible-tower-cli -y
+
+
+
   tasks:
     - debug:
         msg:
