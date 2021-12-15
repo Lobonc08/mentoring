@@ -17,6 +17,7 @@
 #  when: item.name in pdm_projects
   tags:
     - config
+
 - debug:
     var: projects_to_create
 
@@ -31,7 +32,7 @@
       name: "project_{{item | lower}}_{{pdm_prj_version}}"
       scm_type: "git"
       scm_url: "{{scm_base_url}}"
-      organization: "{{blueid_shortcode}}"
+      organization: 2	#"{{blueid_shortcode}}"
       scm-branch: "{{pdm_branch}}"
       scm-credential: "{{scm_creds}}"
     validate_certs: no
