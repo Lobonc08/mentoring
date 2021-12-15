@@ -18,8 +18,9 @@
       when: ((not supported_distro|bool) and not disable_os_detect|bool)
       register: supported_os
 
-    - name: 'install tower-cli'
-      shell: "pip install ansible-tower-cli"
+#TILOS
+#    - name: 'install tower-cli'
+#      shell: "pip install ansible-tower-cli"
 
 
 
