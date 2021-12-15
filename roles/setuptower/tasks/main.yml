@@ -42,7 +42,7 @@
     headers:
       Content-Type: application/json
   register: job_request
-  no_log: true
+#  no_log: true
   loop: "{{ projects_to_create | unique }}"
   tags:
     - config
