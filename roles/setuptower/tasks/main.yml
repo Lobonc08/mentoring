@@ -1,50 +1,4 @@
 ---
-#- name: "Step 2: Check ecm_custid and ecm_custname variables"
-#  fail: 
-#    msg: "Variables ecm_custid or/and ecm_custname is undefined"
-#  when: (ecm_custname is undefined)
-
-- name: "Setting Tower-cli - block"
-  block:
-    - name: "Set Tower Host..."
-      shell: "tower-cli config host {{ lookup('env','TOWER_HOST') }} &> /dev/null; tower-cli config host"
-      failed_when: false
-      changed_when: false
-      register: tower_host_config
-
-    - name: "Set Tower USER..."
-      shell: "tower-cli config username {{ lookup('env','TOWER_USERNAME') }} &> /dev/null; tower-cli config username"
-      args:
-        executable: /bin/bash
-      failed_when: false
-      changed_when: false
-      register: tower_user_config
-
-    - name: "Set Tower Usr PWD..."
-      command: "tower-cli config password {{ lookup('env','TOWER_PASSWORD') }}"
-      failed_when: false
-      changed_when: false
-      no_log: true
-
-    - name: "Set Tower SSL..."
-      shell: "tower-cli config verify_ssl {{verify_ssl}} &> /dev/null; tower-cli config verify_ssl"
-      failed_when: false
-      changed_when: false
-      register: tower_ssl_config
-      
-#    - name: "Set Tower output format to yaml..."
-#      shell: "tower-cli config format yaml"
-#      failed_when: false
-#      changed_when: false
-  tags:
-    - config
-
-- debug:
-    msg:
-      - "{{ tower_host_config.stdout }}"
-      - "{{ tower_user_config.stdout }}"
-      - "{{ tower_ssl_config.stdout }}"
-
 - name: "Set variables"
   set_fact:
     pdm_branch: "{{ pdm_version }}"
@@ -65,16 +19,15 @@
     - config
 
 - name: "Create PbDevM Project"
-  shell: "tower-cli project create --name project_{{item | lower}}_{{pdm_prj_version}} --organization {{blueid_shortcode}} --scm-type git --scm-branch {{pdm_branch}} --scm-credential {{scm_creds}} --scm-url {{scm_base_url}}"
-  args:
-    executable: /bin/bash
+  shell: curl -f -k -H 'Content-Type: application/json' -XPOST -u {{ lookup('env','TOWER_USERNAME') }}:{{ lookup('env','TOWER_PASSWORD') }} '{{ lookup('env','TOWER_HOST') }}/api/v2/projects/' -d '{ "name": "project_{{item | lower}}_{{pdm_prj_version}}", "scm_type": "git", "scm_url": "{{scm_base_url}}", "organization": "{{blueid_shortcode}}", "scm-branch": "{{pdm_branch}}", "scm-credential": "{{scm_creds}}" }'
+#  "tower-cli project create --name project_{{item | lower}}_{{pdm_prj_version}} --organization {{blueid_shortcode}} --scm-type git --scm-branch {{pdm_branch}} --scm-credential {{scm_creds}} --scm-url {{scm_base_url}}"
   loop: "{{ projects_to_create | unique }}"
   tags:
     - config
 
-
-- name: "Check project status"
-  shell: 'tower-cli project status -n "project_{{item | lower}}_{{pdm_prj_version}}"'
+- name: "Check project status(???)"
+  shell: curl -f -k -H 'Content-Type: application/json' -XGET -u {{ lookup('env','TOWER_USERNAME') }}:{{ lookup('env','TOWER_PASSWORD') }} '{{ lookup('env','TOWER_HOST') }}/api/v2/projects/?name="project_{{item | lower}}_{{pdm_prj_version}}"'
+#'tower-cli project status -n "project_{{item | lower}}_{{pdm_prj_version}}"'
   register: result
   until: "result.stdout.find('status: successful') != -1"
   retries: 10
@@ -83,9 +36,14 @@
   tags:
   - config
 
+
+#curl -f -k -H 'Content-Type: application/json' -XGET --user tower_admin:123456 "https://192.168.122.68:8043/api/v2/projects/?name=project-sajatgit" |  jq '.results | .[] | .id'
+
+
 - name: "Create PbDevM Scan Job Template"
-  shell: "tower-cli job_template create --name template_{{item.name | replace('-','_') | lower}}_{{pdm_prj_version}} --job-type run --project project_{{item.project | lower}}_{{pdm_prj_version}} --playbook HelloWorld.yml --ask-inventory-on-launch true --ask-credential-on-launch true --ask-limit-on-launch true --ask-verbosity-on-launch true --ask-variables-on-launch true --allow-simultaneous true"
+  shell: curl -f -k -H 'Content-Type: application/json' -XPOST -u {{ lookup('env','TOWER_USERNAME') }}:{{ lookup('env','TOWER_PASSWORD') }} '{{ lookup('env','TOWER_HOST') }}/api/v2/job_templates/' -d '{ "name": "template_{{item.name | replace('-','_') | lower}}_{{pdm_prj_version}}", "job-type": "run","project": "project_{{item.project | lower}}_{{pdm_prj_version}}", "playbook": "HelloWorld.yml", "inventory": "{{blueid_shortcode}}", "allow-simultaneous": "true", "verbosity": 1 }'
+#"tower-cli job_template create --name template_{{item.name | replace('-','_') | lower}}_{{pdm_prj_version}} --job-type run --project project_{{item.project | lower}}_{{pdm_prj_version}} --playbook HelloWorld.yml --ask-inventory-on-launch true --ask-credential-on-launch true --ask-limit-on-launch true --ask-verbosity-on-launch true --ask-variables-on-launch true --allow-simultaneous true"
   loop: "{{ policies_config.policies }}"
-  when: item.name in pdm_projects and item.name != 'Windows-OS' and item.name != 'Linux-OS'
+#  when: item.name in pdm_projects
   tags:
     - config
