@@ -62,9 +62,9 @@
     body:
       name: "template_{{item.name | replace('-','_') | lower}}_{{pdm_prj_version}}"
       job-type: "run"
-      project: "project_{{item.project | lower}}_{{pdm_prj_version}}"
+      project: 20	#20=project_awx-tower-szia_main=project_{{item.project | lower}}_{{pdm_prj_version}}	#"project_{{item.project | lower}}_{{pdm_prj_version}}"
       playbook: "HelloWorld.yml"
-      inventory: "{{blueid_shortcode}}"
+      inventory: 2	#2=mentoring	#"{{blueid_shortcode}}"
       allow-simultaneous: "true"
       verbosity: 1
     validate_certs: no
