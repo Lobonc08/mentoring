@@ -19,31 +19,27 @@
     - config
 
 - name: "Create PbDevM Project"
-  shell: curl -f -k -H 'Content-Type: application/json' -XPOST -u {{ lookup('env','TOWER_USERNAME') }}:{{ lookup('env','TOWER_PASSWORD') }} "{{ lookup('env','TOWER_HOST') }}/api/v2/projects/" -d '{ "name": "project_{{item | lower}}_{{pdm_prj_version}}", "scm_type": "git", "scm_url": "{{scm_base_url}}", "organization": "{{blueid_shortcode}}", "scm-branch": "{{pdm_branch}}", "scm-credential": "{{scm_creds}}" }'
-#  "tower-cli project create --name project_{{item | lower}}_{{pdm_prj_version}} --organization {{blueid_shortcode}} --scm-type git --scm-branch {{pdm_branch}} --scm-credential {{scm_creds}} --scm-url {{scm_base_url}}"
+  uri: 
+    url: "{{ lookup('env','TOWER_HOST') }}/api/v2/projects/"
+    method: POST
+    user: "{{ lookup('env','TOWER_USERNAME') }}"
+    password: "{{ lookup('env','TOWER_PASSWORD') }}"
+    body_format: json
+    body:
+      name: "project_{{item | lower}}_{{pdm_prj_version}}"
+      scm_type: "git"
+      scm_url: "{{scm_base_url}}"
+      organization: "{{blueid_shortcode}}"
+      scm-branch: "{{pdm_branch}}"
+      scm-credential: "{{scm_creds}}"
+    validate_certs: no
+    force_basic_auth: true
+    status_code: 201, 200
+    return_content: true
+    headers:
+      Content-Type: application/json
+  register: job_request
+  no_log: true
   loop: "{{ projects_to_create | unique }}"
-  tags:
-    - config
-
-- name: "Check project status(???)"
-  shell: curl -f -k -H 'Content-Type: application/json' -XGET -u {{ lookup('env','TOWER_USERNAME') }}:{{ lookup('env','TOWER_PASSWORD') }} "{{ lookup('env','TOWER_HOST') }}/api/v2/projects/?name='project_{{item | lower}}_{{pdm_prj_version}}'"
-#'tower-cli project status -n "project_{{item | lower}}_{{pdm_prj_version}}"'
-  register: result
-  until: "result.stdout.find('status: successful') != -1"
-  retries: 10
-  delay: 10
-  loop: "{{ projects_to_create | unique }}"
-  tags:
-  - config
-
-
-#curl -f -k -H 'Content-Type: application/json' -XGET --user tower_admin:123456 "https://192.168.122.68:8043/api/v2/projects/?name=project-sajatgit" |  jq '.results | .[] | .id'
-
-
-- name: "Create PbDevM Scan Job Template"
-  shell: curl -f -k -H 'Content-Type: application/json' -XPOST -u {{ lookup('env','TOWER_USERNAME') }}:{{ lookup('env','TOWER_PASSWORD') }} "{{ lookup('env','TOWER_HOST') }}/api/v2/job_templates/" -d '{ "name": "template_{{item.name | replace('-','_') | lower}}_{{pdm_prj_version}}", "job-type": "run","project": "project_{{item.project | lower}}_{{pdm_prj_version}}", "playbook": "HelloWorld.yml", "inventory": "{{blueid_shortcode}}", "allow-simultaneous": "true", "verbosity": 1 }'
-#"tower-cli job_template create --name template_{{item.name | replace('-','_') | lower}}_{{pdm_prj_version}} --job-type run --project project_{{item.project | lower}}_{{pdm_prj_version}} --playbook HelloWorld.yml --ask-inventory-on-launch true --ask-credential-on-launch true --ask-limit-on-launch true --ask-verbosity-on-launch true --ask-variables-on-launch true --allow-simultaneous true"
-  loop: "{{ policies_config.policies }}"
-#  when: item.name in pdm_projects
   tags:
     - config
